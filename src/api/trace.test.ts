@@ -167,6 +167,24 @@ describe("TraceIndex", () => {
     expect(matched?.connection.id).toBe("conn-1");
   });
 
+  it("ignores log lines replayed by a stream reset", () => {
+    const index = new TraceIndex();
+    index.setServerStart(SERVER_START);
+    index.ingest(tcpFlowEntries());
+    expect(index.getFlow(1570528218)?.lineCount).toBe(8);
+
+    // A daemon log stream reset replays the ring buffer with fresh local ids.
+    index.ingest(tcpFlowEntries());
+    expect(index.getFlow(1570528218)?.lineCount).toBe(8);
+    expect(index.getFlow(1570528218)?.lines).toHaveLength(8);
+
+    // Genuinely new lines are still captured after a replay.
+    index.ingest([
+      entry("DEBUG[25439] [1570528218 20.00s] connection: connection download finished"),
+    ]);
+    expect(index.getFlow(1570528218)?.lineCount).toBe(9);
+  });
+
   it("does not match unrelated flows", () => {
     const index = new TraceIndex();
     index.setServerStart(SERVER_START);

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from "react";
 
 import { formatBytes, formatDateTime, formatDurationMs } from "../api/format";
 import type { ConnectionTrace, ParsedLogLine, RuleMatch } from "../api/trace";
@@ -360,5 +360,90 @@ export function ConnectionTraceSection(props: { connection: Connection; closedAt
         </Button>
       </div>
     </DetailSection>
+  );
+}
+
+export type ConnectionDetailTab = "details" | "trace";
+
+const DETAIL_TABS: ConnectionDetailTab[] = ["details", "trace"];
+
+export function ConnectionDetailTabs(props: {
+  connection: Connection;
+  closedAt: number | null;
+  initialTab?: ConnectionDetailTab;
+  children: ReactNode;
+}) {
+  const { t } = useI18n();
+  const [tab, setTab] = useState<ConnectionDetailTab>(props.initialTab ?? "details");
+  const id = useId();
+  const tabId = (value: ConnectionDetailTab) => `${id}-${value}-tab`;
+  const panelId = (value: ConnectionDetailTab) => `${id}-${value}-panel`;
+  const labels: Record<ConnectionDetailTab, string> = {
+    details: t("Details"),
+    trace: t("Trace"),
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const { key } = event;
+    if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") {
+      return;
+    }
+    event.preventDefault();
+    let next: ConnectionDetailTab;
+    if (key === "Home") {
+      next = DETAIL_TABS[0];
+    } else if (key === "End") {
+      next = DETAIL_TABS[DETAIL_TABS.length - 1];
+    } else {
+      const current = DETAIL_TABS.indexOf(tab);
+      const rtl = document.documentElement.dir === "rtl";
+      const forward = (key === "ArrowRight") !== rtl;
+      next = DETAIL_TABS[(current + (forward ? 1 : -1) + DETAIL_TABS.length) % DETAIL_TABS.length];
+    }
+    setTab(next);
+    document.getElementById(tabId(next))?.focus();
+  };
+
+  return (
+    <>
+      <div
+        className={`segmented full ${styles.tabs}`}
+        role="tablist"
+        aria-label={t("Connection")}
+        onKeyDown={onKeyDown}
+      >
+        {DETAIL_TABS.map((value) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            id={tabId(value)}
+            aria-selected={tab === value}
+            aria-controls={panelId(value)}
+            tabIndex={tab === value ? 0 : -1}
+            className={tab === value ? "active" : undefined}
+            onClick={() => setTab(value)}
+          >
+            {labels[value]}
+          </button>
+        ))}
+      </div>
+      <div
+        role="tabpanel"
+        id={panelId("details")}
+        aria-labelledby={tabId("details")}
+        hidden={tab !== "details"}
+      >
+        {props.children}
+      </div>
+      <div
+        role="tabpanel"
+        id={panelId("trace")}
+        aria-labelledby={tabId("trace")}
+        hidden={tab !== "trace"}
+      >
+        <ConnectionTraceSection connection={props.connection} closedAt={props.closedAt} />
+      </div>
+    </>
   );
 }

@@ -19,6 +19,7 @@ import { Icon } from "../components/Icon";
 import { PageHeader } from "../components/PageHeader";
 import { StreamStates } from "../components/StreamBanner";
 import { Badge, Button, DataLine, DetailSection, DetailShell, MenuItem, MenuLabel, OthersMenu, SearchInput } from "../components/ui";
+import { ConnectionTraceSection, useTraceCapture } from "./ConnectionTrace";
 import styles from "./ConnectionsView.module.css";
 
 const STATE_OPTIONS: { value: ConnectionStateFilter; label: MessageKey }[] = [
@@ -43,6 +44,7 @@ export function ConnectionsView() {
   const api = useApi();
   const { t } = useI18n();
   const connections = useStream(api.connections);
+  useTraceCapture();
   const isMobile = useIsMobile();
   const [stateFilter, setStateFilter] = useState<ConnectionStateFilter>(loadConnectionStateFilter);
   const [sortMode, setSortMode] = useState<ConnectionSortMode>(loadConnectionSortMode);
@@ -293,7 +295,7 @@ const ConnectionRowView = memo(function ConnectionRowView(props: {
   );
 });
 
-function ConnectionDetailBody(props: { row: ConnectionRow; onClose: () => void }) {
+export function ConnectionDetailBody(props: { row: ConnectionRow; onClose: () => void }) {
   const api = useApi();
   const { t, language } = useI18n();
   const row = props.row;
@@ -305,6 +307,7 @@ function ConnectionDetailBody(props: { row: ConnectionRow; onClose: () => void }
       <div className="hint" style={{ fontFamily: "var(--font-mono)" }}>
         {connection.id}
       </div>
+      <ConnectionTraceSection connection={connection} closedAt={row.closedAt} />
       <DetailSection title={t("Traffic")}>
         <Line label={t("Created at")} value={formatDateTime(Number(connection.createdAt), language)} />
         {row.closedAt !== null && (

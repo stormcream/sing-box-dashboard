@@ -1,3 +1,5 @@
+import { CUSTOM_TRANSLATIONS } from "./customTranslations";
+
 export type Language = "en" | "zh-Hans" | "zh-Hant" | "fa" | "ru";
 export type TranslatedLanguage = Exclude<Language, "en">;
 
@@ -566,6 +568,8 @@ export const TRANSLATIONS = {
     "fa": "هنگام تجاوز حافظه سرویس از حد مجاز، تمام اتصالات را برای آزادسازی حافظه قطع کنید.",
     "ru": "Завершить все соединения для освобождения памяти при превышении лимита памяти сервиса.",
   },
+
+  ...CUSTOM_TRANSLATIONS,
 } as const satisfies Record<string, Record<TranslatedLanguage, string | PluralForms>>;
 
 export type MessageKey = keyof typeof TRANSLATIONS;

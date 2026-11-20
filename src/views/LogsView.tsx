@@ -15,6 +15,9 @@ import { EmptyState, IconButton, MenuItem, OthersMenu, SearchInput, Spinner, Sub
 import { LogLevel } from "../gen/daemon/started_service_pb";
 import { ansiColorCss, parseAnsi, parseCssColor, stripAnsi, type Rgb } from "../lib/ansi";
 import { canShare, shareError, shareFile } from "../lib/sharing";
+import { loadStoredJson, saveStoredJson } from "../lib/storage";
+import { useTraceCapture } from "./ConnectionTrace";
+import { FlowLogGroups } from "./FlowLogGroups";
 import styles from "./LogsView.module.css";
 
 const MAX_VISIBLE_LOGS = 1000;
@@ -60,11 +63,13 @@ export function LogsView() {
   const host = useDesktopHost();
   const { t } = useI18n();
   const logs = useStream(api.logs);
+  useTraceCapture();
   const outage = useStreamOutage(logs, isTerminalCode(logs.errorCode));
   const [level, setLevel] = useState<LogLevel | null>(null);
   const [paused, setPaused] = useState(false);
   const [frozen, setFrozen] = useState<LogEntry[]>([]);
   const [search, setSearch] = useState("");
+  const [groupByFlow, setGroupByFlow] = useState(() => loadStoredJson("log-group-by-flow") === true);
   const viewRef = useRef<HTMLDivElement>(null);
   const background = useLogBackground();
 
@@ -129,14 +134,18 @@ export function LogsView() {
   if (sourceEntries.length > 0 && outage === null) {
     body = (
       <div className={styles.logView} ref={viewRef}>
-        {visible.map((entry) => (
-          <LogLine
-            key={entry.id}
-            message={entry.message}
-            highlight={search.trim()}
-            background={background}
-          />
-        ))}
+        {groupByFlow ? (
+          <FlowLogGroups entries={visible} highlight={search.trim()} />
+        ) : (
+          visible.map((entry) => (
+            <LogLine
+              key={entry.id}
+              message={entry.message}
+              highlight={search.trim()}
+              background={background}
+            />
+          ))
+        )}
       </div>
     );
   } else if (outage !== null) {
@@ -165,6 +174,18 @@ export function LogsView() {
               <Icon name={paused ? "play_arrow" : "pause"} />
             </IconButton>
             <OthersMenu>
+              <MenuItem
+                checked={groupByFlow}
+                icon="hub"
+                onSelect={() => {
+                  const next = !groupByFlow;
+                  setGroupByFlow(next);
+                  saveStoredJson("log-group-by-flow", next);
+                }}
+              >
+                {t("Group by flow")}
+              </MenuItem>
+              <div className="menu-divider" />
               <SubMenu label={t("Log Level")} icon="filter_list">
                 <MenuItem checked={level === null} onSelect={() => setLevel(null)}>
                   {t("Default")}

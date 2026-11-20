@@ -1,0 +1,122 @@
+.stages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.stage {
+  position: relative;
+  padding-inline-start: var(--space-28);
+}
+
+.stage::before {
+  position: absolute;
+  inset-inline-start: 8px;
+  top: 22px;
+  bottom: calc(-1 * var(--space-16));
+  width: 2px;
+  content: "";
+  background: var(--border);
+}
+
+.stage:last-child::before {
+  display: none;
+}
+
+.dot {
+  position: absolute;
+  inset-inline-start: 1px;
+  top: 3px;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border: 3px solid var(--card);
+  border-radius: 50%;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  align-items: center;
+  min-height: 22px;
+  color: var(--text-secondary);
+}
+
+.title {
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.flow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.toggle {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: 0;
+  margin-inline-start: auto;
+  font: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.toggle:hover {
+  color: var(--text);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.hint {
+  padding: var(--space-8) var(--space-10);
+  margin-top: var(--space-6);
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.logs {
+  composes: text-mono-caption from global;
+  max-height: 240px;
+  padding: var(--space-8) var(--space-10);
+  margin-top: var(--space-6);
+  overflow-y: auto;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+[dir="rtl"] .logs {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.log-line {
+  display: block;
+}
+
+.log-line mark {
+  color: inherit;
+  background: var(--highlight, var(--accent-soft));
+  border-radius: var(--radius-xs);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-10);
+}

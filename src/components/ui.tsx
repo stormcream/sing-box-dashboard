@@ -1028,7 +1028,7 @@ function closeOnBackdropPointerDown(
   }
 }
 
-function Drawer(props: { onClose: () => void; ariaLabel: string; children: ReactNode }) {
+export function Drawer(props: { onClose: () => void; ariaLabel: string; children: ReactNode }) {
   const ref = useShowModal("drawer", true);
   return (
     <dialog

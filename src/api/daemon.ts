@@ -27,6 +27,7 @@ import {
 } from "./bidirectional";
 import { serverConnectUrl, type Server } from "./config";
 import { StreamStore } from "./stream";
+import { TraceStore } from "./trace";
 
 export const STATUS_HISTORY_LENGTH = 30;
 const LOG_MAX_ENTRIES = 3000;
@@ -57,6 +58,7 @@ export interface LogEntry {
   id: number;
   level: LogLevel;
   message: string;
+  receivedAt: number;
 }
 
 export interface LogsData {
@@ -122,6 +124,7 @@ export class DaemonApi {
   readonly clashMode: StreamStore<ClashModeData>;
   readonly logs: StreamStore<LogsData>;
   readonly connections: StreamStore<ConnectionsData>;
+  readonly trace: TraceStore;
   readonly outbounds: StreamStore<OutboundsData>;
   readonly tailscale: StreamStore<TailscaleData>;
   readonly usbip: StreamStore<UsbipData>;
@@ -231,10 +234,12 @@ export class DaemonApi {
             }
             update((data) => {
               let entries = message.reset ? [] : data.entries;
+              const receivedAt = Date.now();
               const appended = message.messages.map((logMessage) => ({
                 id: this.logSequence++,
                 level: logMessage.level,
                 message: logMessage.message,
+                receivedAt,
               }));
               entries = entries.concat(appended);
               if (entries.length > LOG_MAX_ENTRIES) {
@@ -376,6 +381,8 @@ export class DaemonApi {
       },
       true,
     );
+
+    this.trace = new TraceStore(this.logs, this.connections, () => this.getStartedAt());
   }
 
   openBidirectionalStream<I extends DescMessage, O extends DescMessage>(

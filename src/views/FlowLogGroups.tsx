@@ -187,7 +187,7 @@ export function FlowLogGroups(props: { entries: LogEntry[]; highlight: string })
             </span>
           </h3>
           {drawerRow !== null ? (
-            <ConnectionDetailBody row={drawerRow} onClose={() => setOpenGroup(null)} />
+            <ConnectionDetailBody row={drawerRow} onClose={() => setOpenGroup(null)} initialTab="trace" />
           ) : (
             <FlowOnlyBody group={openGroup} flow={drawerFlow} />
           )}

@@ -8,6 +8,7 @@ const MAX_FLOW_LINES = 64;
 const FLOW_HEAD_LINES = 40;
 const MAX_DNS_EVENTS = 2048;
 const MAX_DNS_LINES = 48;
+const MAX_SEEN_MESSAGES = 8192;
 const MATCH_THRESHOLD = 150;
 const FLOW_MATCH_TIME_MS = 5_000;
 const DNS_LINK_WINDOW_MS = 10 * 60_000;
@@ -360,6 +361,7 @@ export class TraceIndex {
   private flowConnectionIds = new Map<number, string>();
   private matchAttempted = new Set<number>();
   private seenConnectionIds = new Set<string>();
+  private seenMessages = new Set<string>();
   private serverStartMs: number | null = null;
   private lastLogId = -1;
 
@@ -469,9 +471,29 @@ export class TraceIndex {
     return { flow, dns: link, dnsCandidates: candidates };
   }
 
+  private rememberMessage(message: string): boolean {
+    if (this.seenMessages.has(message)) {
+      return false;
+    }
+    this.seenMessages.add(message);
+    if (this.seenMessages.size > MAX_SEEN_MESSAGES) {
+      const oldest = this.seenMessages.values().next();
+      if (!oldest.done) {
+        this.seenMessages.delete(oldest.value);
+      }
+    }
+    return true;
+  }
+
   private ingestEntry(entry: LogEntry): void {
     const line = parseLogMessage(entry, this.serverStartMs);
     if (line.flowId === null) {
+      return;
+    }
+    // A log stream reset replays the daemon's ring buffer with fresh local ids.
+    // The formatted text already carries flow id, server time and elapsed time,
+    // so an identical message can only be the same log line replayed.
+    if (!this.rememberMessage(entry.message)) {
       return;
     }
     const flow = this.ensureFlow(line.flowId, line);

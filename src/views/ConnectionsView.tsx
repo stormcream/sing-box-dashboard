@@ -18,7 +18,7 @@ import { useI18n, type MessageKey } from "../app/i18n";
 import { Icon } from "../components/Icon";
 import { PageHeader } from "../components/PageHeader";
 import { StreamStates } from "../components/StreamBanner";
-import { Badge, Button, DataLine, DetailSection, DetailShell, MenuItem, MenuLabel, OthersMenu, SearchInput } from "../components/ui";
+import { Badge, Button, DataLine, DetailSection, DetailShell, Dialog, MenuItem, MenuLabel, OthersMenu, SearchInput } from "../components/ui";
 import { ConnectionDetailTabs, useTraceCapture, type ConnectionDetailTab } from "./ConnectionTrace";
 import styles from "./ConnectionsView.module.css";
 
@@ -50,6 +50,7 @@ export function ConnectionsView() {
   const [sortMode, setSortMode] = useState<ConnectionSortMode>(loadConnectionSortMode);
   const [search, setSearch] = useState("");
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [confirmingCloseAll, setConfirmingCloseAll] = useState(false);
 
   const rows = useMemo(() => {
     const result: ConnectionRow[] = [];
@@ -151,9 +152,7 @@ export function ConnectionsView() {
             <MenuItem
               danger
               icon="close"
-              onSelect={() => {
-                void api.closeAllConnections().catch(showError);
-              }}
+              onSelect={() => setConfirmingCloseAll(true)}
             >
               {t("Close All Connections")}
             </MenuItem>
@@ -184,6 +183,24 @@ export function ConnectionsView() {
         </div>
       )}
       {detail}
+      {confirmingCloseAll && (
+        <Dialog onClose={() => setConfirmingCloseAll(false)}>
+          <h3>{t("Close All Connections")}</h3>
+          <p className="dialog-message">{t("This will close all active connections.")}</p>
+          <div className="row-actions dialog-actions">
+            <Button onClick={() => setConfirmingCloseAll(false)}>{t("Cancel")}</Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                setConfirmingCloseAll(false);
+                void api.closeAllConnections().catch(showError);
+              }}
+            >
+              {t("Close All Connections")}
+            </Button>
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 }

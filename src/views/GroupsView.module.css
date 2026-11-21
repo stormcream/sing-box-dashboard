@@ -87,6 +87,30 @@
   color: var(--bad);
 }
 
+.group-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  align-items: baseline;
+  margin-bottom: var(--space-8);
+}
+
+.group-summary-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.group-summary-type,
+.group-summary .delay-text {
+  font-size: var(--text-xs);
+}
+
+.group-summary-type {
+  color: var(--text-faint);
+}
+
 .group-dots {
   display: flex;
   flex-wrap: wrap;

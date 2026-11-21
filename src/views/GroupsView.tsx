@@ -43,6 +43,7 @@ function GroupCard(props: { group: Group }) {
   const [testing, setTesting] = useState(false);
   const [expanded, setExpandOverride] = usePendingValue(group.isExpand);
   const [selected, setPendingSelection] = usePendingValue(group.selected);
+  const selectedItem = group.items.find((item) => item.tag === selected);
 
   const toggleExpand = () => {
     const next = !expanded;
@@ -107,18 +108,40 @@ function GroupCard(props: { group: Group }) {
             ))}
           </div>
         ) : (
-          <div className={styles.groupDots}>
-            {group.items.map((item) => {
-              const tone = item.urlTestDelay > 0 ? urlTestDelayTone(item.urlTestDelay) : "";
-              return (
+          <>
+            <div className={styles.groupSummary}>
+              <span className={styles.groupSummaryName}>
+                {selected !== "" ? selected : "—"}
+              </span>
+              {selectedItem !== undefined && (
+                <span className={styles.groupSummaryType}>
+                  {proxyDisplayType(selectedItem.type)}
+                </span>
+              )}
+              {selectedItem !== undefined && selectedItem.urlTestDelay > 0 && (
                 <span
-                  key={item.tag}
-                  className={cx(styles.groupDot, styles[tone], item.tag === selected && styles.selected)}
-                  title={`${item.tag}${item.urlTestDelay > 0 ? ` (${item.urlTestDelay}ms)` : ""}`}
-                />
-              );
-            })}
-          </div>
+                  className={cx(
+                    styles.delayText,
+                    styles[urlTestDelayTone(selectedItem.urlTestDelay)],
+                  )}
+                >
+                  {selectedItem.urlTestDelay}ms
+                </span>
+              )}
+            </div>
+            <div className={styles.groupDots}>
+              {group.items.map((item) => {
+                const tone = item.urlTestDelay > 0 ? urlTestDelayTone(item.urlTestDelay) : "";
+                return (
+                  <span
+                    key={item.tag}
+                    className={cx(styles.groupDot, styles[tone], item.tag === selected && styles.selected)}
+                    title={`${item.tag}${item.urlTestDelay > 0 ? ` (${item.urlTestDelay}ms)` : ""}`}
+                  />
+                );
+              })}
+            </div>
+          </>
         )}
       </Card>
     </div>

@@ -35,6 +35,7 @@ import {
 } from "../components/ui";
 import { ServiceStatus_Type, type Group } from "../gen/daemon/started_service_pb";
 import { cx } from "../lib/cx";
+import { useTraceCapture } from "./ConnectionTrace";
 import { topActiveConnections } from "./dashboardData";
 import { ProfileCard } from "./ProfileViews";
 import styles from "./DashboardView.module.css";
@@ -48,6 +49,7 @@ export function DashboardView() {
   const api = useApi();
   const { t } = useI18n();
   const host = useLocalDesktopHost();
+  useTraceCapture();
   const serviceStatus = useStream(api.serviceStatus);
   const statusType = serviceStatus.data.status?.status;
   const started = statusType === ServiceStatus_Type.STARTED;
@@ -540,15 +542,12 @@ function ProxyGroupsPanel() {
   const api = useApi();
   const { t } = useI18n();
   const groups = useStream(api.groups);
-  const selectable = useMemo(
-    () =>
-      groups.data.groups
-        .filter((group) => group.selectable && group.items.length > 0)
-        .slice(0, 4),
+  const visibleGroups = useMemo(
+    () => groups.data.groups.filter((group) => group.items.length > 0),
     [groups.data.groups],
   );
 
-  if (!groups.data.loaded || selectable.length === 0) {
+  if (!groups.data.loaded || visibleGroups.length === 0) {
     return null;
   }
   return (
@@ -556,11 +555,14 @@ function ProxyGroupsPanel() {
       icon="hub"
       title={t("Proxy groups")}
       actions={
-        <ViewAllLink label={t("Manage groups")} onClick={() => navigate("groups")} />
+        <>
+          <Badge>{visibleGroups.length}</Badge>
+          <ViewAllLink label={t("Manage groups")} onClick={() => navigate("groups")} />
+        </>
       }
     >
       <div className={styles.groupList}>
-        {selectable.map((group) => (
+        {visibleGroups.map((group) => (
           <GroupRow key={group.tag} group={group} />
         ))}
       </div>
@@ -583,21 +585,27 @@ function GroupRow(props: { group: Group }) {
         <span className={styles.groupType}>{proxyDisplayType(group.type)}</span>
       </div>
       <div className={styles.groupControl}>
-        <Select
-          options={group.items.map((item) => ({ value: item.tag, label: item.tag }))}
-          value={selected}
-          placeholder="—"
-          onChange={(tag) => {
-            if (tag === selected) {
-              return;
-            }
-            setPending(tag);
-            api.selectOutbound(group.tag, tag).catch((error: unknown) => {
-              setPending(null);
-              showError(error);
-            });
-          }}
-        />
+        {group.selectable ? (
+          <Select
+            options={group.items.map((item) => ({ value: item.tag, label: item.tag }))}
+            value={selected}
+            placeholder="—"
+            onChange={(tag) => {
+              if (tag === selected) {
+                return;
+              }
+              setPending(tag);
+              api.selectOutbound(group.tag, tag).catch((error: unknown) => {
+                setPending(null);
+                showError(error);
+              });
+            }}
+          />
+        ) : (
+          <span className={styles.groupStatic} title={selected}>
+            {selected !== "" ? selected : "—"}
+          </span>
+        )}
       </div>
       <span className={styles.groupDelay}>
         <Badge tone={tone}>{delay > 0 ? `${delay} ms` : "—"}</Badge>

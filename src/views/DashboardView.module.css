@@ -349,6 +349,12 @@
   flex-direction: column;
 }
 
+.group-list {
+  max-height: 282px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .group-row {
   display: grid;
   grid-template-areas:
@@ -386,6 +392,21 @@
 .group-control {
   grid-area: control;
   min-width: 0;
+}
+
+.group-static {
+  display: flex;
+  align-items: center;
+  height: var(--control-height);
+  padding: 0 var(--space-12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  background: var(--inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
 }
 
 .group-delay {
@@ -525,6 +546,12 @@
 
   .rate-value {
     font-size: var(--text-xl);
+  }
+}
+
+@media (max-width: 520px) {
+  .group-list {
+    max-height: 464px;
   }
 }
 

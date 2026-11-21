@@ -12,6 +12,12 @@ export const CUSTOM_TRANSLATIONS = {
   "Manage groups": { "zh-Hans": "管理代理组", "zh-Hant": "管理代理群組", "fa": "مدیریت گروه‌ها", "ru": "Управление группами" },
   "Live connections": { "zh-Hans": "实时连接", "zh-Hant": "即時連線", "fa": "اتصال‌های زنده", "ru": "Текущие подключения" },
   "View all": { "zh-Hans": "查看全部", "zh-Hant": "檢視全部", "fa": "مشاهده همه", "ru": "Показать все" },
+  "This will close all active connections.": {
+    "zh-Hans": "这会关闭当前所有活动连接。",
+    "zh-Hant": "這會關閉目前所有活動連線。",
+    "fa": "این کار همه اتصال‌های فعال را می‌بندد.",
+    "ru": "Это закроет все активные подключения.",
+  },
   "Trace": { "zh-Hans": "链路", "zh-Hant": "鏈路", "fa": "ردیابی", "ru": "Трассировка" },
   "Unmatched": { "zh-Hans": "未关联", "zh-Hant": "未關聯", "fa": "مرتبط‌نشده", "ru": "Не сопоставлено" },
   "Routing": { "zh-Hans": "路由", "zh-Hant": "路由", "fa": "مسیریابی", "ru": "Маршрутизация" },

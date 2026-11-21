@@ -1,0 +1,48 @@
+name: Dev Release
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-dev
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm generate
+      - run: pnpm build
+      - name: Package dist as zip
+        run: |
+          cd dist
+          zip -qr ../sing-box-dashboard-dev.zip .
+      - name: Publish to Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -f dev-latest "$GITHUB_SHA"
+          git push -f origin refs/tags/dev-latest
+          if ! gh release view dev-latest >/dev/null 2>&1; then
+            gh release create dev-latest \
+              --title "sing-box-dashboard dev build" \
+              --notes ""
+          fi
+          gh release upload dev-latest sing-box-dashboard-dev.zip --clobber
+          gh release edit dev-latest \
+            --title "sing-box-dashboard dev build" \
+            --notes "Built from [\`${GITHUB_SHA:0:7}\`](https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}) on \`${GITHUB_REF_NAME}\`."

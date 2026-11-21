@@ -79,7 +79,7 @@ import {
   powerReportFileDisplayName,
   powerReportTitle,
 } from "./views/reportFormat";
-import { OverviewView } from "./views/OverviewView";
+import { DashboardView } from "./views/DashboardView";
 import {
   ImportProfileFileDialog,
   ImportRemoteProfileDialog,
@@ -866,7 +866,7 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
 
   const mainContent = (
     <main className={styles.content}>
-      {route.page === "overview" && <OverviewView />}
+      {route.page === "overview" && <DashboardView />}
       {route.page === "groups" && <GroupsView />}
       {route.page === "connections" && <ConnectionsView />}
       {route.page === "logs" && <LogsView />}

@@ -44,6 +44,8 @@ import styles from "./DashboardView.module.css";
 const CHART_CAPACITY = 30;
 const CHART_WIDTH = 1000;
 const CHART_HEIGHT = 180;
+// Both side-by-side panels show the same number of rows so they stay the same height.
+const ROW_CAPACITY = 8;
 
 export function DashboardView() {
   const api = useApi();
@@ -562,7 +564,7 @@ function ProxyGroupsPanel() {
       }
     >
       <div className={styles.groupList}>
-        {visibleGroups.map((group) => (
+        {visibleGroups.slice(0, ROW_CAPACITY).map((group) => (
           <GroupRow key={group.tag} group={group} />
         ))}
       </div>
@@ -575,8 +577,6 @@ function GroupRow(props: { group: Group }) {
   const group = props.group;
   const [selected, setPending] = usePendingValue(group.selected);
   const selectedItem = group.items.find((item) => item.tag === selected);
-  const delay = selectedItem?.urlTestDelay ?? 0;
-  const tone = delay > 0 ? urlTestDelayTone(delay) : undefined;
 
   return (
     <div className={styles.groupRow}>
@@ -587,9 +587,13 @@ function GroupRow(props: { group: Group }) {
       <div className={styles.groupControl}>
         {group.selectable ? (
           <Select
-            options={group.items.map((item) => ({ value: item.tag, label: item.tag }))}
+            options={group.items.map((item) => ({
+              value: item.tag,
+              label: <ProxyItemLabel name={item.tag} delay={item.urlTestDelay} />,
+            }))}
             value={selected}
             placeholder="—"
+            growMenu
             onChange={(tag) => {
               if (tag === selected) {
                 return;
@@ -603,14 +607,24 @@ function GroupRow(props: { group: Group }) {
           />
         ) : (
           <span className={styles.groupStatic} title={selected}>
-            {selected !== "" ? selected : "—"}
+            <ProxyItemLabel
+              name={selected !== "" ? selected : "—"}
+              delay={selectedItem?.urlTestDelay ?? 0}
+            />
           </span>
         )}
       </div>
-      <span className={styles.groupDelay}>
-        <Badge tone={tone}>{delay > 0 ? `${delay} ms` : "—"}</Badge>
-      </span>
     </div>
+  );
+}
+
+function ProxyItemLabel(props: { name: string; delay: number }) {
+  const tone = props.delay > 0 ? urlTestDelayTone(props.delay) : undefined;
+  return (
+    <span className={styles.optionLabel}>
+      <span className={styles.optionName}>{props.name}</span>
+      <Badge tone={tone}>{props.delay > 0 ? `${props.delay} ms` : "—"}</Badge>
+    </span>
   );
 }
 
@@ -619,7 +633,7 @@ function LiveConnectionsPanel() {
   const { t } = useI18n();
   const connections = useStream(api.connections);
   const rows = useMemo(
-    () => topActiveConnections(connections.data.rows.values(), 5),
+    () => topActiveConnections(connections.data.rows.values(), ROW_CAPACITY),
     [connections.data.rows],
   );
   const loading = !connections.data.loaded && connections.phase !== "error";

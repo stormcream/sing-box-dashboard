@@ -491,13 +491,15 @@ export function Select<T extends string | number>(props: {
   disabled?: boolean;
   inline?: boolean;
   placeholder?: ReactNode;
+  /** Let the option menu grow wider than the trigger to fit its contents. */
+  growMenu?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   useDismiss(ref, open, () => setOpen(false));
   useMenuPopover(ref, listRef, open, () => setOpen(false), {
-    width: props.inline ? "min-anchor" : "anchor",
+    width: props.inline || props.growMenu === true ? "min-anchor" : "anchor",
   });
 
   const selected = props.options.find((option) => option.value === props.value);
@@ -555,7 +557,9 @@ export function Select<T extends string | number>(props: {
           className={
             props.inline
               ? "menu popover-menu select-menu grow"
-              : "menu popover-menu select-menu"
+              : props.growMenu === true
+                ? "menu popover-menu select-menu grow-menu"
+                : "menu popover-menu select-menu"
           }
           role="listbox"
           ref={listRef}

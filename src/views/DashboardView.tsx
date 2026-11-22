@@ -44,8 +44,9 @@ import styles from "./DashboardView.module.css";
 const CHART_CAPACITY = 30;
 const CHART_WIDTH = 1000;
 const CHART_HEIGHT = 180;
-// Both side-by-side panels show the same number of rows so they stay the same height.
-const ROW_CAPACITY = 8;
+// Overview shows this many live connections; the proxy group list renders all
+// groups and scrolls inside its capped panel.
+const CONNECTION_ROW_CAPACITY = 8;
 
 export function DashboardView() {
   const api = useApi();
@@ -564,7 +565,7 @@ function ProxyGroupsPanel() {
       }
     >
       <div className={styles.groupList}>
-        {visibleGroups.slice(0, ROW_CAPACITY).map((group) => (
+        {visibleGroups.map((group) => (
           <GroupRow key={group.tag} group={group} />
         ))}
       </div>
@@ -633,7 +634,7 @@ function LiveConnectionsPanel() {
   const { t } = useI18n();
   const connections = useStream(api.connections);
   const rows = useMemo(
-    () => topActiveConnections(connections.data.rows.values(), ROW_CAPACITY),
+    () => topActiveConnections(connections.data.rows.values(), CONNECTION_ROW_CAPACITY),
     [connections.data.rows],
   );
   const loading = !connections.data.loaded && connections.phase !== "error";

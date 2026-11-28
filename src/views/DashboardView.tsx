@@ -38,6 +38,7 @@ import { cx } from "../lib/cx";
 import { useTraceCapture } from "./ConnectionTrace";
 import { topActiveConnections } from "./dashboardData";
 import { ProfileCard } from "./ProfileViews";
+import { PublicIpTiles } from "./PublicIpTiles";
 import styles from "./DashboardView.module.css";
 
 // The status stream pushes one sample per second and keeps a 30 sample window.
@@ -495,7 +496,7 @@ function StatTiles(props: { startedAt: number | null }) {
         label={t("Goroutines")}
         value={current !== null ? String(current.goroutines) : "…"}
       />
-      <UptimeTile startedAt={props.startedAt} />
+      <PublicIpTiles startedAt={props.startedAt} />
     </section>
   );
 }
@@ -529,16 +530,6 @@ function StatTile(props: {
     );
   }
   return <div className={styles.tile}>{content}</div>;
-}
-
-function UptimeTile(props: { startedAt: number | null }) {
-  const { t } = useI18n();
-  const now = useNow(1000);
-  const value =
-    props.startedAt !== null && props.startedAt > 0
-      ? formatUptime(props.startedAt, now)
-      : "—";
-  return <StatTile icon="schedule" label={t("Uptime")} value={value} />;
 }
 
 function ProxyGroupsPanel() {

@@ -71,4 +71,8 @@ export const CUSTOM_TRANSLATIONS = {
     "fa": "هیچ گزارش جریانی برای این اتصال ثبت نشد.",
     "ru": "Журналы потока для этого подключения не найдены.",
   },
+  "Public IP": { "zh-Hans": "公网 IP", "zh-Hant": "公網 IP", "fa": "IP عمومی", "ru": "Публичный IP" },
+  "Domestic IP": { "zh-Hans": "国内 IP", "zh-Hant": "國內 IP", "fa": "IP داخلی", "ru": "Внутренний IP" },
+  "Foreign IP": { "zh-Hans": "国外 IP", "zh-Hant": "國外 IP", "fa": "IP خارجی", "ru": "Зарубежный IP" },
+  "Refresh": { "zh-Hans": "刷新", "zh-Hant": "重新整理", "fa": "تازه‌سازی", "ru": "Обновить" },
 } as const satisfies Record<string, Record<TranslatedLanguage, string | PluralForms>>;

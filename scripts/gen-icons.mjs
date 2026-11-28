@@ -58,6 +58,7 @@ const ICONS = {
   drag_handle: "filled",
   menu: "filled",
   dns: "filled",
+  public: "outlined",
   usb: "filled",
   usb_off: "filled",
   description: "outlined",
